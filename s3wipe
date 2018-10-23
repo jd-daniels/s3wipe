@@ -194,8 +194,6 @@ def main():
         sys.exit(1)
 
     logger.info(mybucket.get_versioning_status())
-    mybucket.configure_versioning(False)
-    logger.info(mybucket.get_versioning_status())
 
     # Poll the root-level directories in the s3 bucket, and
     # start a reader process for each one of them
