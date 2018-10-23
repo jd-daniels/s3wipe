@@ -151,7 +151,7 @@ def lister(subDir):
 
     # Iterate through bucket and enqueue all keys found in
     # our deletion queue
-    for key in mybucket.list_versions(prefix=subDir.name):
+    for key in mybucket.list(prefix=subDir.name):
         rmQueue.put(key)
         with keysFound.get_lock():
             keysFound.value += 1
@@ -193,11 +193,13 @@ def main():
         logger.error(shortErr)
         sys.exit(1)
 
-    mybucket.configure_versioning(True)
+    logger.info(mybucket.get_versioning_status())
+    mybucket.configure_versioning(False)
+    logger.info(mybucket.get_versioning_status())
 
     # Poll the root-level directories in the s3 bucket, and
     # start a reader process for each one of them
-    subDirs = list(mybucket.list_versions(prefix=path, delimiter="/"))
+    subDirs = list(mybucket.list(prefix=path, delimiter='/'))
     listThreads = len(subDirs)
     deleteThreads = listThreads*2
 
@@ -225,7 +227,7 @@ def main():
     logger.info("Done deleting keys")
 
     if args.delbucket and path is None:
-        if list(mybucket.list_versions(delimiter='/')):
+        if list(mybucket.list(delimiter='/')):
             logger.info("Bucket not empty.  Not removing (this can happen "  +
                 "when deleting large amounts of files.  It sometimes takes " +
                 "the S3 service a while (minutes to days) to catch up.")
